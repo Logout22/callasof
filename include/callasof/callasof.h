@@ -1,4 +1,5 @@
 #include <glib.h>
 
-void set_lsof_executable_path(const char* path);
+gchar* get_lsof_executable_path();
+void set_lsof_executable_path(const gchar* path);
 GError* lsof();
