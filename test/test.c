@@ -1,27 +1,13 @@
-#include <glib.h>
-
-typedef struct {
-} CallasofFixture;
+#include "callasof/callasof.h"
 
 static void
-callasof_fixture_set_up (CallasofFixture *fixture,
-                          gconstpointer user_data)
+test_fails_if_lsof_cannot_be_found ()
 {
-    (void)fixture;(void)user_data;
-}
-
-static void
-callasof_fixture_tear_down (CallasofFixture *fixture,
-                             gconstpointer user_data)
-{
-    (void)fixture;(void)user_data;
-}
-
-static void
-test_fails_if_lsof_cannot_be_found (CallasofFixture *fixture,
-        gconstpointer user_data)
-{
-    (void)fixture;(void)user_data;
+    set_lsof_executable_path("/current_dir/no_lsof");
+    GError* error = lsof();
+    g_assert_true(error);
+    g_assert_error(error, NULL, NULL);
+    g_error_free (error);
 }
 
 int main (int argc, char *argv[])
@@ -29,9 +15,9 @@ int main (int argc, char *argv[])
     g_test_init (&argc, &argv, NULL);
 
     // Define the tests.
-    g_test_add ("/my-object/test_fails_if_lsof_cannot_be_found", CallasofFixture, NULL,
-            callasof_fixture_set_up, test_fails_if_lsof_cannot_be_found,
-            callasof_fixture_tear_down);
+    g_test_add_func(
+            "/my-object/test_fails_if_lsof_cannot_be_found",
+            test_fails_if_lsof_cannot_be_found);
 
     return g_test_run ();
 }
