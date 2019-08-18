@@ -10,13 +10,13 @@ void set_lsof_executable_path(const char* path) {
 GError* lsof()
 {
     char* argv[2];
-    argv[1] = lsof_executable_path;
-    argv[2] = NULL;
+    argv[0] = lsof_executable_path;
+    argv[1] = NULL;
     GError* spawnError = NULL;
     if (!g_spawn_sync(
                 NULL,
                 argv, NULL,
-                G_SPAWN_DEFAULT,
+                G_SPAWN_STDOUT_TO_DEV_NULL | G_SPAWN_STDERR_TO_DEV_NULL,
                 NULL, NULL,
                 NULL, NULL,
                 NULL, &spawnError)) {

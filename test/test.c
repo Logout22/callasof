@@ -6,7 +6,7 @@ test_fails_if_lsof_cannot_be_found ()
     set_lsof_executable_path("/current_dir/no_lsof");
     GError* error = lsof();
     g_assert_true(error);
-    g_assert_error(error, NULL, NULL);
+    g_assert_error(error, G_SPAWN_ERROR, G_SPAWN_ERROR_NOENT);
     g_error_free (error);
 }
 
