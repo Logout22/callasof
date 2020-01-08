@@ -41,7 +41,7 @@ GError* lsof()
 }
 
 GHashTable* parse_lsof_output(const gchar* lsof_output) {
-    GHashTable* parsed_output = g_hash_table_new(g_int_hash, g_int_equal);
+    GHashTable* parsed_output = g_hash_table_new_full(g_direct_hash, g_direct_equal, NULL, g_free);
 
     gchar** lines = g_strsplit(lsof_output, "\n", -1);
     gsize line_number = 1;
@@ -50,7 +50,7 @@ GHashTable* parse_lsof_output(const gchar* lsof_output) {
         // TODO use regex to cope with varying whitespace
         gchar** columns = g_strsplit(line, "      ", lsof_column_count);
         gint pid = atoi(columns[1]);
-        g_hash_table_replace(parsed_output, &pid, "");
+        g_hash_table_replace(parsed_output, GINT_TO_POINTER(pid), g_strdup(""));
         ++line_number;
     }
     g_strfreev(lines);

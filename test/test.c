@@ -61,8 +61,15 @@ test_provides_pid_map ()
     GHashTable* parsed_output = parse_lsof_output(example_lsof_output);
     g_assert_true(parsed_output);
     GList* keys = g_hash_table_get_keys(parsed_output);
+
     g_assert_true(keys);
-    g_assert_cmpuint(g_list_length(keys), ==, 3);
+    size_t pid_list_length = 3;
+    gint process_ids[] = {5903, 6188, 6189};
+    g_assert_cmpuint(g_list_length(keys), ==, pid_list_length);
+    for (size_t i = 0; i < pid_list_length; ++i)
+    {
+        g_assert_cmpint(g_list_index(keys, GINT_TO_POINTER(process_ids[i])), !=, -1);
+    }
     g_list_free(keys);
 }
 
