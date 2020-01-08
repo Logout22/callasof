@@ -53,3 +53,7 @@ dkms.conf
 
 # Build directory
 build
+cmake-build-debug
+
+# IDEs
+**/.vscode/*
