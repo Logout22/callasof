@@ -1,44 +1,6 @@
 #include "callasof/callasof.h"
 
-// clang-format off
-static gchar example_lsof_output[] =
-"COMMAND    PID  TID TASKCMD      USER   FD      TYPE             DEVICE  SIZE/OFF       NODE NAME\n"
-"bash      5903                munzner  cwd       DIR              254,3      4096    3407873 /home/munzner\n"
-"bash      5903                munzner  rtd       DIR              254,2      4096          2 /\n"
-"bash      5903                munzner  txt       REG              254,2    903464     137621 /usr/bin/bash\n"
-"bash      5903                munzner  mem       REG              254,2     51376     134179 /usr/lib/libnss_files-2.29.so\n"
-"bash      5903                munzner  mem       REG              254,2   3373280     161460 /usr/lib/locale/locale-archive\n"
-"bash      5903                munzner  mem       REG              254,2    449040     134912 /usr/lib/libncursesw.so.6.1\n"
-"bash      5903                munzner  mem       REG              254,2   2133648     134119 /usr/lib/libc-2.29.so\n"
-"bash      5903                munzner  mem       REG              254,2     14512     134139 /usr/lib/libdl-2.29.so\n"
-"bash      5903                munzner  mem       REG              254,2    326392     137593 /usr/lib/libreadline.so.8.0\n"
-"bash      5903                munzner  mem       REG              254,2    198088     134074 /usr/lib/ld-2.29.so\n"
-"bash      5903                munzner    0u      CHR              136,3       0t0          6 /dev/pts/3\n"
-"bash      5903                munzner    1u      CHR              136,3       0t0          6 /dev/pts/3\n"
-"bash      5903                munzner    2u      CHR              136,3       0t0          6 /dev/pts/3\n"
-"bash      5903                munzner  255u      CHR              136,3       0t0          6 /dev/pts/3\n"
-"lsof      6188                munzner  cwd       DIR              254,3      4096    3407873 /home/munzner\n"
-"lsof      6188                munzner  rtd       DIR              254,2      4096          2 /\n"
-"lsof      6188                munzner  txt       REG              254,2    168256     181755 /usr/bin/lsof\n"
-"lsof      6188                munzner  mem       REG              254,2   3373280     161460 /usr/lib/locale/locale-archive\n"
-"lsof      6188                munzner  mem       REG              254,2   2133648     134119 /usr/lib/libc-2.29.so\n"
-"lsof      6188                munzner  mem       REG              254,2    198088     134074 /usr/lib/ld-2.29.so\n"
-"lsof      6188                munzner    0u      CHR              136,3       0t0          6 /dev/pts/3\n"
-"lsof      6188                munzner    1w      REG               0,40         0     172103 /tmp/test-lsof-output.txt\n"
-"lsof      6188                munzner    2u      CHR              136,3       0t0          6 /dev/pts/3\n"
-"lsof      6188                munzner    3r      DIR                0,4         0          1 /proc\n"
-"lsof      6188                munzner    4r      DIR                0,4         0     172105 /proc/6188/fd\n"
-"lsof      6188                munzner    5w     FIFO               0,12       0t0     172110 pipe\n"
-"lsof      6188                munzner    6r     FIFO               0,12       0t0     172111 pipe\n"
-"lsof      6189                munzner  cwd       DIR              254,3      4096    3407873 /home/munzner\n"
-"lsof      6189                munzner  rtd       DIR              254,2      4096          2 /\n"
-"lsof      6189                munzner  txt       REG              254,2    168256     181755 /usr/bin/lsof\n"
-"lsof      6189                munzner  mem       REG              254,2   3373280     161460 /usr/lib/locale/locale-archive\n"
-"lsof      6189                munzner  mem       REG              254,2   2133648     134119 /usr/lib/libc-2.29.so\n"
-"lsof      6189                munzner  mem       REG              254,2    198088     134074 /usr/lib/ld-2.29.so\n"
-"lsof      6189                munzner    4r     FIFO               0,12       0t0     172110 pipe\n"
-"lsof      6189                munzner    7w     FIFO               0,12       0t0     172111 pipe";
-// clang-format on
+#include "test_output.h"
 
 static void test_fails_if_lsof_cannot_be_found() {
   set_lsof_executable_path("/current_dir/no_lsof");
