@@ -1,7 +1,6 @@
 #include "callasof/callasof.h"
 
 #define max_path 65535
-#define lsof_column_count 11
 
 static gchar *_internal_lsof_executable_path() {
   static gchar lsof_executable_path[max_path];
@@ -33,20 +32,22 @@ GError *lsof() {
   return NULL;
 }
 
-GHashTable *parse_lsof_output(const gchar *lsof_output) {
+GHashTable *parse_lsof_output(const GArray *lsof_output) {
   GHashTable *parsed_output =
       g_hash_table_new_full(g_direct_hash, g_direct_equal, NULL, g_free);
 
-  gchar **lines = g_strsplit(lsof_output, "\n", -1);
-  gsize line_number = 1;
-  gchar *line = NULL;
-  while ((line = lines[line_number])) {
-    // TODO use regex to cope with varying whitespace
-    gchar **columns = g_strsplit(line, "      ", lsof_column_count);
-    gint pid = atoi(columns[1]);
-    g_hash_table_replace(parsed_output, GINT_TO_POINTER(pid), g_strdup(""));
-    ++line_number;
+  /*GString *scratch;
+  scratch = g_string_new(NULL);*/
+  for (gsize i = 0; i < lsof_output->len; ++i) {
+    // gchar current_character = g_array_index(lsof_output, gchar, i);
+    /*gchar **columns = g_strsplit(line, '\0', lsof_column_count);
+    gchar *column;
+    for (gsize column_number = 0; (column = columns[column_number]);
+    ++column_number) { if (*(column++) == 'p') { gint pid = atoi(column);
+        g_hash_table_replace(parsed_output, GINT_TO_POINTER(pid), g_strdup(""));
+      }
+    }
+    g_strfreev(columns);*/
   }
-  g_strfreev(lines);
   return parsed_output;
 }

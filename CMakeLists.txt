@@ -6,6 +6,7 @@ pkg_check_modules(deps REQUIRED IMPORTED_TARGET glib-2.0)
 
 add_library(callasof
     src/callasof.c)
+set_property(TARGET callasof PROPERTY C_STANDARD 11)
 target_compile_options(callasof PRIVATE -Werror -Wall -Wextra)
 target_include_directories(callasof PUBLIC
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>

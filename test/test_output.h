@@ -1,3 +1,5 @@
+#pragma once
+
 // clang-format off
 static gchar example_lsof_output[] =
 "p9097\0g9097\0R23617\0czsh\0u1000\0Llogout\0\n"
