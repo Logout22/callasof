@@ -1,4 +1,9 @@
+#include "parser_fsm.h"
+
 #include "callasof/callasof.h"
+
+#include <assert.h>
+#include <stdio.h>
 
 #define max_path 65535
 
@@ -32,22 +37,28 @@ GError *lsof() {
   return NULL;
 }
 
-GHashTable *parse_lsof_output(const GArray *lsof_output) {
-  GHashTable *parsed_output =
-      g_hash_table_new_full(g_direct_hash, g_direct_equal, NULL, g_free);
+GHashTable *parse_lsof_output(const GByteArray *lsof_output) {
+  /*GHashTable *parsed_output =
+      g_hash_table_new_full(g_direct_hash, g_direct_equal, NULL, g_free);*/
 
-  /*GString *scratch;
-  scratch = g_string_new(NULL);*/
+  enum state_codes current_state = started_parsing;
+  ParserFsmState context;
+  context.current_content = g_string_new("");
+  context.current_record =
+      g_hash_table_new_full(g_direct_hash, g_direct_equal, NULL, g_free);
   for (gsize i = 0; i < lsof_output->len; ++i) {
-    // gchar current_character = g_array_index(lsof_output, gchar, i);
-    /*gchar **columns = g_strsplit(line, '\0', lsof_column_count);
-    gchar *column;
-    for (gsize column_number = 0; (column = columns[column_number]);
-    ++column_number) { if (*(column++) == 'p') { gint pid = atoi(column);
-        g_hash_table_replace(parsed_output, GINT_TO_POINTER(pid), g_strdup(""));
-      }
+    gchar current_character = g_array_index(lsof_output, gchar, i);
+    state_fn state_function = state[current_state];
+    enum transition_events event = state_function(&context, current_character);
+    enum state_codes next_state = LOOKUP_TRANSITION(current_state, event);
+    if (next_state == invalid) {
+      fprintf(stderr, "ERROR: No transition from %d with event %d\n",
+              current_state, event);
+      assert(FALSE);
+      break;
     }
-    g_strfreev(columns);*/
+    current_state = next_state;
   }
-  return parsed_output;
+  return context.current_record;
+  // return parsed_output;
 }

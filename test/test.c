@@ -45,7 +45,8 @@ int main(int argc, char *argv[]) {
   // g_test_add_func("/callasof/test_provides_pid_map", test_provides_pid_map);
 
   // Parser tests
-  g_test_add_func("/parser/test_parser", test_parser);
+  g_test_add_func("/parser/test_reads_all_fields_in_a_record",
+                  test_reads_all_fields_in_a_record);
 
   return g_test_run();
 }
