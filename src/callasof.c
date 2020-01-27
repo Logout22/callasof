@@ -38,9 +38,6 @@ GError *lsof() {
 }
 
 GHashTable *parse_lsof_output(const GByteArray *lsof_output) {
-  /*GHashTable *parsed_output =
-      g_hash_table_new_full(g_direct_hash, g_direct_equal, NULL, g_free);*/
-
   enum state_codes current_state = started_parsing;
   ParserFsmState context;
   context.current_content = g_string_new("");
@@ -60,5 +57,4 @@ GHashTable *parse_lsof_output(const GByteArray *lsof_output) {
     current_state = next_state;
   }
   return context.current_record;
-  // return parsed_output;
 }
