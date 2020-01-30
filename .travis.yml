@@ -8,6 +8,11 @@ compiler:
   - gcc
   - clang
 
+addons:
+  apt:
+    packages:
+      - valgrind
+
 script:
   - >
     if [ "$TRAVIS_OS_NAME" = "osx" ];
