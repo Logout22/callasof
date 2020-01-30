@@ -2,9 +2,10 @@
 set -o errexit
 
 echo "========== FORMAT CODE =========="
+status_before=$(git status --porcelain)
 find . -type f \( -name '*.c' -o -name '*.h' \) -exec clang-format -i {} \; -print
-if [ -n "$(git status --porcelain)" ]; then
-    echo "There were errors in the formatting. Aborting build."
+if [ "$status_before" != "$(git status --porcelain)" ]; then
+    echo "There were changes in the formatting. Aborting build."
     exit 1
 fi
 echo "============= BUILD ============="
