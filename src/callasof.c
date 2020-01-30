@@ -56,5 +56,6 @@ GHashTable *parse_lsof_output(const GByteArray *lsof_output) {
     }
     current_state = next_state;
   }
+  g_string_free(context.current_content, TRUE);
   return context.current_record;
 }
