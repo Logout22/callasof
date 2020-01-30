@@ -9,4 +9,4 @@ cd build
 cmake ..
 make
 echo "============= TEST =============="
-valgrind --leak-check=full test/callasof_test
+valgrind --leak-check=full --error-exitcode=1 test/callasof_test
