@@ -9,7 +9,8 @@ compiler:
   - clang
 
 script:
-  - if [ "$TRAVIS_OS_NAME" = "osx" ]; \
-      then WITH_VALGRIND=no ./build.sh; \
-      else ./build.sh; \
-      fi
+  - >
+    if [ "$TRAVIS_OS_NAME" = "osx" ];
+    then WITH_VALGRIND=no ./build.sh;
+    else ./build.sh;
+    fi
