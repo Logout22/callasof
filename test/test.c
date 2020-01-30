@@ -2,6 +2,8 @@
 
 #include "test_output.h"
 
+#include <string.h>
+
 // Parser tests
 void test_reads_all_fields_in_a_record() {
   const gsize test_input_length =
