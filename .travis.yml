@@ -8,8 +8,8 @@ compiler:
   - gcc
   - clang
 
-before_install:
-  - if [ "$TRAVIS_OS_NAME" = "osx" ]; then brew update && brew install valgrind; fi
-
 script:
-  - ./build.sh
+  - if [ "$TRAVIS_OS_NAME" = "osx" ]; \
+      then WITH_VALGRIND=no ./build.sh; \
+      else ./build.sh; \
+      fi
