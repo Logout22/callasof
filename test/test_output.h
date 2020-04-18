@@ -1,7 +1,7 @@
 #pragma once
 
 // clang-format off
-static char example_lsof_output[] =
+static const char example_lsof_output[] =
 "p9097\0g9097\0R23617\0czsh\0u1000\0Llogout\0\n"
 "fcwd\0a \0l \0tDIR\0D0xfd02\0s4096\0i24251829\0k7\0n/home/logout/devtrees/callasof\0\n"
 "frtd\0a \0l \0tDIR\0D0xfd01\0s4096\0i2\0k31\0n/\0\n"
@@ -101,7 +101,13 @@ static char example_lsof_output[] =
 "f2\0au\0l \0tCHR\0G0x2;0x0\0D0x16\0o0t0\0i5\0k1\0n/dev/pts/2\0\n"
 "f10\0au\0l \0tCHR\0G0x88002;0x0\0D0x16\0o0t0\0i5\0k1\0n/dev/pts/2\0\n";
 
-const char example_single_line_output[] = "p9097\0g9097\0R23617\0czsh\0u1000\0Llogout\0\n";
+static const char example_single_line_output[] = "p9097\0g9097\0R23617\0czsh\0u1000\0Llogout\0\n";
+
+static const char example_single_process_output[] =
+"p9097\0g9097\0R23617\0czsh\0u1000\0Llogout\0\n"
+"fcwd\0a \0l \0tDIR\0D0xfd02\0s4096\0i24251829\0k7\0n/home/logout/devtrees/callasof\0\n"
+"frtd\0a \0l \0tDIR\0D0xfd01\0s4096\0i2\0k31\0n/\0\n"
+"ftxt\0a \0l \0tREG\0D0xfd01\0s832416\0i2097559\0k1\0n/bin/zsh\0\n";
 // clang-format on
 
 // subtract trailing 0 byte

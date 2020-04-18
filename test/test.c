@@ -14,11 +14,10 @@ void test_reads_all_fields_in_a_record() {
 
   GHashTable *result = parse_lsof_output(input_array);
 
-#define element_count 6
+  const guint element_count = 6;
   g_assert_cmpuint(element_count, ==, g_hash_table_size(result));
-  gchar *expected_output[element_count][2] = {{"p", "9097"},  {"g", "9097"},
-                                              {"R", "23617"}, {"c", "zsh"},
-                                              {"u", "1000"},  {"L", "logout"}};
+  gchar *expected_output[][2] = {{"p", "9097"}, {"g", "9097"}, {"R", "23617"},
+                                 {"c", "zsh"},  {"u", "1000"}, {"L", "logout"}};
   for (guint i = 0; i < element_count; ++i) {
     gint key = expected_output[i][0][0];
     g_assert_cmpstr(expected_output[i][1], ==,
@@ -26,6 +25,79 @@ void test_reads_all_fields_in_a_record() {
   }
 
   g_hash_table_destroy(result);
+  g_byte_array_free(input_array, TRUE);
+}
+
+void test_reads_all_records_for_a_process() {
+  const gsize test_input_length =
+      STATIC_BYTE_ARRAY_LENGTH(example_single_process_output);
+  GByteArray *input_array = g_byte_array_sized_new(test_input_length);
+  g_byte_array_append(input_array,
+                      (const guint8 *)example_single_process_output,
+                      test_input_length);
+
+  // TODO remove cast
+  GPtrArray *result = (GPtrArray *)parse_lsof_output(input_array);
+
+  const guint element_count = 4;
+  g_assert_cmpuint(element_count, ==, result->len);
+  gchar *expected_first_record[][2] = {{"p", "9097"},  {"g", "9097"},
+                                       {"R", "23617"}, {"c", "zsh"},
+                                       {"u", "1000"},  {"L", "logout"}};
+#define test_reads_all_records_for_a_process_file_field_count 9
+  gchar *expected_file_records
+      [][test_reads_all_records_for_a_process_file_field_count][2] = {
+          {{"f", "cwd"},
+           {"a", " "},
+           {"l", " "},
+           {"t", "DIR"},
+           {"D", "0xfd02"},
+           {"s", "4096"},
+           {"i", "24251829"},
+           {"k", "7"},
+           {"n", "/home/logout/devtrees/callasof"}},
+          {{"f", "rtd"},
+           {"a", " "},
+           {"l", " "},
+           {"t", "DIR"},
+           {"D", "0xfd01"},
+           {"s", "4096"},
+           {"i", "2"},
+           {"k", "31"},
+           {"n", "/"}},
+          {{"f", "txt"},
+           {"a", " "},
+           {"l", " "},
+           {"t", "REG"},
+           {"D", "0xfd01"},
+           {"s", "832416"},
+           {"i", "2097559"},
+           {"k", "7"}, // TODO intentionally wrong
+           {"n", "/bin/zsh"}},
+      };
+
+  const guint pid_field_count = 6;
+  GHashTable *first_record = g_ptr_array_index(result, 0);
+  for (guint i = 0; i < pid_field_count; ++i) {
+    gint key = expected_first_record[i][0][0];
+    g_assert_cmpstr(
+        expected_first_record[i][1], ==,
+        (gchar *)g_hash_table_lookup(first_record, GINT_TO_POINTER(key)));
+  }
+  g_hash_table_destroy(first_record);
+  for (guint i = 1; i < element_count; i++) {
+    GHashTable *current_record = g_ptr_array_index(result, i);
+    for (guint j = 0; j < test_reads_all_records_for_a_process_file_field_count;
+         j++) {
+      gint key = expected_file_records[i - 1][j][0][0];
+      g_assert_cmpstr(
+          expected_file_records[i - 1][j][1], ==,
+          (gchar *)g_hash_table_lookup(current_record, GINT_TO_POINTER(key)));
+    }
+    g_hash_table_destroy(current_record);
+  }
+
+  g_ptr_array_free(result, TRUE);
   g_byte_array_free(input_array, TRUE);
 }
 
@@ -72,6 +144,8 @@ int main(int argc, char *argv[]) {
   // Parser tests
   g_test_add_func("/parser/test_reads_all_fields_in_a_record",
                   test_reads_all_fields_in_a_record);
+  g_test_add_func("/parser/test_reads_all_records_for_a_process",
+                  test_reads_all_records_for_a_process);
 
   // Main tests
   g_test_add_func("/callasof/test_fails_if_lsof_cannot_be_found",
