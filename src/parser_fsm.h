@@ -56,23 +56,26 @@ static enum transition_events determine_event(gchar input) {
   }
 }
 
-static enum transition_events started_parsing_state(ParserFsmState *state,
-                                                    gchar next) {
+static enum transition_events shift_byte_and_event(ParserFsmState *state,
+                                                   gchar next) {
   state->current_byte = next;
   return determine_event(next);
+}
+
+static enum transition_events started_parsing_state(ParserFsmState *state,
+                                                    gchar next) {
+  return shift_byte_and_event(state, next);
 }
 
 static enum transition_events collecting_identifier_state(ParserFsmState *state,
                                                           gchar next) {
   state->current_identifier = state->current_byte;
-  state->current_byte = next;
-  return determine_event(next);
+  return shift_byte_and_event(state, next);
 }
 
 static unsigned collecting_content_state(ParserFsmState *state, gchar next) {
   g_string_append_c(state->current_content, state->current_byte);
-  state->current_byte = next;
-  return determine_event(next);
+  return shift_byte_and_event(state, next);
 }
 
 static unsigned creating_field_state(ParserFsmState *state, gchar next) {
@@ -80,11 +83,10 @@ static unsigned creating_field_state(ParserFsmState *state, gchar next) {
   g_hash_table_insert(state->current_record,
                       GINT_TO_POINTER(state->current_identifier), raw_string);
   state->current_content = g_string_new("");
-  state->current_byte = next;
-  return determine_event(next);
+  return shift_byte_and_event(state, next);
 }
 
 static unsigned creating_record_state(ParserFsmState *state, gchar next) {
-  state->current_byte = next;
-  return determine_event(next);
+
+  return shift_byte_and_event(state, next);
 }
