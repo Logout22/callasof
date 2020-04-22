@@ -73,12 +73,12 @@ static enum transition_events collecting_identifier_state(ParserFsmState *state,
   return shift_byte_and_event(state, next);
 }
 
-static unsigned collecting_content_state(ParserFsmState *state, gchar next) {
+static enum transition_events collecting_content_state(ParserFsmState *state, gchar next) {
   g_string_append_c(state->current_content, state->current_byte);
   return shift_byte_and_event(state, next);
 }
 
-static unsigned creating_field_state(ParserFsmState *state, gchar next) {
+static enum transition_events creating_field_state(ParserFsmState *state, gchar next) {
   gchar *raw_string = g_string_free(state->current_content, FALSE);
   g_hash_table_insert(state->current_record,
                       GINT_TO_POINTER(state->current_identifier), raw_string);
@@ -86,7 +86,7 @@ static unsigned creating_field_state(ParserFsmState *state, gchar next) {
   return shift_byte_and_event(state, next);
 }
 
-static unsigned creating_record_state(ParserFsmState *state, gchar next) {
+static enum transition_events creating_record_state(ParserFsmState *state, gchar next) {
 
   return shift_byte_and_event(state, next);
 }
