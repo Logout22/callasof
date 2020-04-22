@@ -38,25 +38,36 @@ GError *lsof() {
   return NULL;
 }
 
+static gboolean process_character(ParserFsmState* context, gchar current_character);
+
 GHashTable *parse_lsof_output(const GByteArray *lsof_output) {
-  enum state_codes current_state = started_parsing;
   ParserFsmState context;
   context.current_content = g_string_new("");
   context.current_record =
       g_hash_table_new_full(g_direct_hash, g_direct_equal, NULL, g_free);
+  context.current_state = started_parsing;
   for (gsize i = 0; i < lsof_output->len; ++i) {
     gchar current_character = g_array_index(lsof_output, gchar, i);
-    state_fn state_function = state[current_state];
-    enum transition_events event = state_function(&context, current_character);
-    enum state_codes next_state = LOOKUP_TRANSITION(current_state, event);
-    if (next_state == invalid) {
-      fprintf(stderr, "ERROR: No transition from %d with event %d\n",
-              current_state, event);
-      assert(FALSE);
-      break;
+    gboolean processing_successful = process_character(&context, current_character);
+    if (!processing_successful) {
+      fprintf(stderr, "ERROR: Could not parse character (see previous errors)\n");
+      return NULL;
     }
-    current_state = next_state;
   }
   g_string_free(context.current_content, TRUE);
   return context.current_record;
+}
+
+static gboolean process_character(ParserFsmState* context, gchar current_character)
+{
+    state_fn state_function = state[context->current_state];
+    enum transition_events event = state_function(context, current_character);
+    enum state_codes next_state = LOOKUP_TRANSITION(context->current_state, event);
+    if (next_state == invalid) {
+      fprintf(stderr, "ERROR: No transition from %d with event %d\n",
+              context->current_state, event);
+      return FALSE;
+    }
+    context->current_state = next_state;
+    return TRUE;
 }

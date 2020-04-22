@@ -9,6 +9,7 @@ typedef struct ParserFsmState {
   gchar current_identifier;
   GString *current_content;
   GHashTable *current_record;
+  guint current_state;
 } ParserFsmState;
 
 typedef unsigned (*state_fn)(ParserFsmState *state, gchar next);
