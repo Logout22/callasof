@@ -64,16 +64,17 @@ gboolean parse_lsof_output(const GByteArray *lsof_output,
   return TRUE;
 }
 
-static gboolean process_character(ParserFsmState* context, gchar current_character)
-{
-    state_fn state_function = state[context->current_state];
-    enum transition_events event = state_function(context, current_character);
-    enum state_codes next_state = LOOKUP_TRANSITION(context->current_state, event);
-    if (next_state == invalid) {
-      fprintf(stderr, "ERROR: No transition from %d with event %d\n",
-              context->current_state, event);
-      return FALSE;
-    }
-    context->current_state = next_state;
-    return TRUE;
+static gboolean process_character(ParserFsmState *context,
+                                  gchar current_character) {
+  state_fn state_function = state[context->current_state];
+  enum transition_events event = state_function(context, current_character);
+  enum state_codes next_state =
+      LOOKUP_TRANSITION(context->current_state, event);
+  if (next_state == invalid) {
+    fprintf(stderr, "ERROR: No transition from %d with event %d\n",
+            context->current_state, event);
+    return FALSE;
+  }
+  context->current_state = next_state;
+  return TRUE;
 }
