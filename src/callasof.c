@@ -38,24 +38,30 @@ GError *lsof() {
   return NULL;
 }
 
-static gboolean process_character(ParserFsmState* context, gchar current_character);
+static gboolean process_character(ParserFsmState *context,
+                                  gchar current_character);
 
-GHashTable *parse_lsof_output(const GByteArray *lsof_output) {
+gboolean parse_lsof_output(const GByteArray *lsof_output,
+                           ParserCallbacks *parser_callbacks) {
   ParserFsmState context;
   context.current_content = g_string_new("");
   context.current_record =
       g_hash_table_new_full(g_direct_hash, g_direct_equal, NULL, g_free);
   context.current_state = started_parsing;
-  for (gsize i = 0; i < lsof_output->len; ++i) {
-    gchar current_character = g_array_index(lsof_output, gchar, i);
-    gboolean processing_successful = process_character(&context, current_character);
+  context.parser_callbacks = parser_callbacks;
+  for (gsize i = 0; i <= lsof_output->len; ++i) {
+    gchar current_character =
+        i < lsof_output->len ? g_array_index(lsof_output, gchar, i) : 0;
+    gboolean processing_successful =
+        process_character(&context, current_character);
     if (!processing_successful) {
-      fprintf(stderr, "ERROR: Could not parse character (see previous errors)\n");
-      return NULL;
+      fprintf(stderr,
+              "ERROR: Could not parse character (see previous errors)\n");
+      return FALSE;
     }
   }
   g_string_free(context.current_content, TRUE);
-  return context.current_record;
+  return TRUE;
 }
 
 static gboolean process_character(ParserFsmState* context, gchar current_character)

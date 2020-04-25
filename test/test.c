@@ -5,30 +5,42 @@
 #include <string.h>
 
 // Parser tests
-void test_reads_all_fields_in_a_record() {
+GHashTable *test_reads_all_fields_in_a_record_result = NULL;
+
+static void test_reads_all_fields_in_a_record_on_record_parsed(GHashTable *record) {
+  test_reads_all_fields_in_a_record_result = record;
+}
+
+static void test_reads_all_fields_in_a_record() {
   const gsize test_input_length =
       STATIC_BYTE_ARRAY_LENGTH(example_single_line_output);
   GByteArray *input_array = g_byte_array_sized_new(test_input_length);
   g_byte_array_append(input_array, (const guint8 *)example_single_line_output,
                       test_input_length);
 
-  GHashTable *result = parse_lsof_output(input_array);
+  ParserCallbacks callbacks = {
+      .on_record_parsed = test_reads_all_fields_in_a_record_on_record_parsed};
+
+  g_assert(parse_lsof_output(input_array, &callbacks));
 
   const guint element_count = 6;
-  g_assert_cmpuint(element_count, ==, g_hash_table_size(result));
+  g_assert_cmpuint(element_count, ==,
+                   g_hash_table_size(test_reads_all_fields_in_a_record_result));
   gchar *expected_output[][2] = {{"p", "9097"}, {"g", "9097"}, {"R", "23617"},
                                  {"c", "zsh"},  {"u", "1000"}, {"L", "logout"}};
   for (guint i = 0; i < element_count; ++i) {
     gint key = expected_output[i][0][0];
-    g_assert_cmpstr(expected_output[i][1], ==,
-                    (gchar *)g_hash_table_lookup(result, GINT_TO_POINTER(key)));
+    g_assert_cmpstr(
+        expected_output[i][1], ==,
+        (gchar *)g_hash_table_lookup(test_reads_all_fields_in_a_record_result,
+                                     GINT_TO_POINTER(key)));
   }
 
-  g_hash_table_destroy(result);
+  g_hash_table_destroy(test_reads_all_fields_in_a_record_result);
   g_byte_array_free(input_array, TRUE);
 }
 
-void test_reads_all_records_for_a_process() {
+static void test_reads_all_records_for_a_process() {
   const gsize test_input_length =
       STATIC_BYTE_ARRAY_LENGTH(example_single_process_output);
   GByteArray *input_array = g_byte_array_sized_new(test_input_length);

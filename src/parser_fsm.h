@@ -2,6 +2,8 @@
 
 #include "fsm.h"
 
+#include "callasof/callasof.h"
+
 #include "glib.h"
 
 typedef struct ParserFsmState {
@@ -10,6 +12,7 @@ typedef struct ParserFsmState {
   GString *current_content;
   GHashTable *current_record;
   guint current_state;
+  ParserCallbacks *parser_callbacks;
 } ParserFsmState;
 
 typedef unsigned (*state_fn)(ParserFsmState *state, gchar next);
@@ -74,12 +77,14 @@ static enum transition_events collecting_identifier_state(ParserFsmState *state,
   return shift_byte_and_event(state, next);
 }
 
-static enum transition_events collecting_content_state(ParserFsmState *state, gchar next) {
+static enum transition_events collecting_content_state(ParserFsmState *state,
+                                                       gchar next) {
   g_string_append_c(state->current_content, state->current_byte);
   return shift_byte_and_event(state, next);
 }
 
-static enum transition_events creating_field_state(ParserFsmState *state, gchar next) {
+static enum transition_events creating_field_state(ParserFsmState *state,
+                                                   gchar next) {
   gchar *raw_string = g_string_free(state->current_content, FALSE);
   g_hash_table_insert(state->current_record,
                       GINT_TO_POINTER(state->current_identifier), raw_string);
@@ -87,7 +92,12 @@ static enum transition_events creating_field_state(ParserFsmState *state, gchar 
   return shift_byte_and_event(state, next);
 }
 
-static enum transition_events creating_record_state(ParserFsmState *state, gchar next) {
-
+static enum transition_events creating_record_state(ParserFsmState *state,
+                                                    gchar next) {
+  if (state->parser_callbacks) {
+    if (state->parser_callbacks->on_record_parsed) {
+      state->parser_callbacks->on_record_parsed(state->current_record);
+    }
+  }
   return shift_byte_and_event(state, next);
 }
