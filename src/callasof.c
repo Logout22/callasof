@@ -47,6 +47,8 @@ gboolean parse_lsof_output(const GByteArray *lsof_output,
   context.current_content = g_string_new("");
   context.current_record =
       g_hash_table_new_full(g_direct_hash, g_direct_equal, NULL, g_free);
+  context.current_process_records =
+      g_ptr_array_new_with_free_func(g_hash_table_destroy_with_loose_signature);
   context.current_state = started_parsing;
   context.parser_callbacks = parser_callbacks;
   for (gsize i = 0; i <= lsof_output->len; ++i) {
@@ -59,6 +61,9 @@ gboolean parse_lsof_output(const GByteArray *lsof_output,
               "ERROR: Could not parse character (see previous errors)\n");
       return FALSE;
     }
+  }
+  if (parser_callbacks && parser_callbacks->on_process_parsed) {
+    parser_callbacks->on_process_parsed(context.current_process_records);
   }
   g_string_free(context.current_content, TRUE);
   return TRUE;

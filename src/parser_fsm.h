@@ -7,11 +7,12 @@
 #include "glib.h"
 
 typedef struct ParserFsmState {
+  guint current_state;
   gchar current_byte;
   gchar current_identifier;
   GString *current_content;
   GHashTable *current_record;
-  guint current_state;
+  GPtrArray *current_process_records;
   ParserCallbacks *parser_callbacks;
 } ParserFsmState;
 
@@ -71,10 +72,29 @@ static enum transition_events started_parsing_state(ParserFsmState *state,
   return shift_byte_and_event(state, next);
 }
 
+static void check_and_notify_process_entry(ParserFsmState *state);
+static void g_hash_table_destroy_with_loose_signature(void *hash_table);
+
 static enum transition_events collecting_identifier_state(ParserFsmState *state,
                                                           gchar next) {
   state->current_identifier = state->current_byte;
+  check_and_notify_process_entry(state);
   return shift_byte_and_event(state, next);
+}
+
+static void check_and_notify_process_entry(ParserFsmState *state) {
+  if (state->current_identifier == 'p') {
+    if (state->parser_callbacks && state->parser_callbacks->on_process_parsed) {
+      state->parser_callbacks->on_process_parsed(
+          state->current_process_records);
+    }
+    state->current_process_records = g_ptr_array_new_with_free_func(
+        g_hash_table_destroy_with_loose_signature);
+  }
+}
+
+static void g_hash_table_destroy_with_loose_signature(void *hash_table) {
+  g_hash_table_destroy((GHashTable *)hash_table);
 }
 
 static enum transition_events collecting_content_state(ParserFsmState *state,
@@ -99,5 +119,10 @@ static enum transition_events creating_record_state(ParserFsmState *state,
       state->parser_callbacks->on_record_parsed(state->current_record);
     }
   }
+
+  g_ptr_array_add(state->current_process_records, state->current_record);
+  state->current_record =
+      g_hash_table_new_full(g_direct_hash, g_direct_equal, NULL, g_free);
+
   return shift_byte_and_event(state, next);
 }
