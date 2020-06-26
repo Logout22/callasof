@@ -65,6 +65,8 @@ gboolean parse_lsof_output(const GByteArray *lsof_output,
   if (parser_callbacks && parser_callbacks->on_process_parsed) {
     parser_callbacks->on_process_parsed(context.current_process_records);
   }
+  g_ptr_array_unref(context.current_process_records);
+  g_hash_table_unref(context.current_record);
   g_string_free(context.current_content, TRUE);
   return TRUE;
 }

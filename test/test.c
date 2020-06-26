@@ -2,13 +2,19 @@
 
 #include "test_output.h"
 
+#include <stdio.h>
 #include <string.h>
 
 // Parser tests
+GPtrArray *test_reads_all_fields_in_a_record_process_records = NULL;
 GHashTable *test_reads_all_fields_in_a_record_result = NULL;
 
 static void
-test_reads_all_fields_in_a_record_on_record_parsed(GHashTable *record) {
+test_reads_all_fields_in_a_record_on_record_parsed(GPtrArray *process_records,
+                                                   GHashTable *record) {
+  g_ptr_array_ref(process_records);
+  test_reads_all_fields_in_a_record_process_records = process_records;
+  g_hash_table_ref(record);
   test_reads_all_fields_in_a_record_result = record;
 }
 
@@ -37,7 +43,8 @@ static void test_reads_all_fields_in_a_record() {
                                      GINT_TO_POINTER(key)));
   }
 
-  g_hash_table_destroy(test_reads_all_fields_in_a_record_result);
+  g_hash_table_unref(test_reads_all_fields_in_a_record_result);
+  g_ptr_array_unref(test_reads_all_fields_in_a_record_process_records);
   g_byte_array_free(input_array, TRUE);
 }
 
@@ -45,6 +52,7 @@ GPtrArray *test_reads_all_records_for_a_process_result = NULL;
 
 static void test_reads_all_records_for_a_process_process_parsed(
     GPtrArray *process_records) {
+  g_ptr_array_ref(process_records);
   test_reads_all_records_for_a_process_result = process_records;
 }
 
@@ -120,7 +128,7 @@ static void test_reads_all_records_for_a_process() {
     }
   }
 
-  g_ptr_array_free(test_reads_all_records_for_a_process_result, TRUE);
+  g_ptr_array_unref(test_reads_all_records_for_a_process_result);
   g_byte_array_free(input_array, TRUE);
 }
 

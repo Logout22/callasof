@@ -84,10 +84,12 @@ static enum transition_events collecting_identifier_state(ParserFsmState *state,
 
 static void check_and_notify_process_entry(ParserFsmState *state) {
   if (state->current_identifier == 'p') {
-    if (state->parser_callbacks && state->parser_callbacks->on_process_parsed) {
+    if (state->parser_callbacks && state->parser_callbacks->on_process_parsed &&
+        state->current_process_records->len) {
       state->parser_callbacks->on_process_parsed(
           state->current_process_records);
     }
+    g_ptr_array_unref(state->current_process_records);
     state->current_process_records = g_ptr_array_new_with_free_func(
         g_hash_table_destroy_with_loose_signature);
   }
@@ -116,7 +118,8 @@ static enum transition_events creating_record_state(ParserFsmState *state,
                                                     gchar next) {
   if (state->parser_callbacks) {
     if (state->parser_callbacks->on_record_parsed) {
-      state->parser_callbacks->on_record_parsed(state->current_record);
+      state->parser_callbacks->on_record_parsed(state->current_process_records,
+                                                state->current_record);
     }
   }
 
